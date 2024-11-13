@@ -14,7 +14,7 @@ public class XRHandsManager : MonoBehaviour
     private SendData sendDataScript;
 
     private float timer = 0f;
-    private float timerInterval = 0.1f;
+    private float timerInterval = 0.2f;
     void Start()
     {
         // Get the active XR loader and hand subsystem. 
@@ -58,8 +58,8 @@ public class XRHandsManager : MonoBehaviour
                 if (leftHand.isTracked)
                 {
                     //Debug.Log("Left hand is being tracked");
-                    XRHandJoint leftWristJoint = leftHand.GetJoint(XRHandJointID.Wrist);
-                    HandData leftData = ProcessHandData(leftHand, leftWristJoint);
+                    //XRHandJoint leftWristJoint = leftHand.GetJoint(XRHandJointID.Wrist);
+                    HandData leftData = ProcessHandData(leftHand);
                     //sendDataScript.SendToArduino(leftData);
                 }
 
@@ -67,8 +67,8 @@ public class XRHandsManager : MonoBehaviour
                 if (rightHand.isTracked)
                 {
                     //Debug.Log("Right hand is being tracked");
-                    XRHandJoint rightWristJoint = rightHand.GetJoint(XRHandJointID.Wrist);
-                    HandData rightData = ProcessHandData(rightHand, rightWristJoint);
+                    //XRHandJoint rightWristJoint = rightHand.GetJoint(XRHandJointID.Wrist);
+                    HandData rightData = ProcessHandData(rightHand);
                     sendDataScript.SendToArduino(rightData);
                 }
                 timer = 0f;
@@ -80,7 +80,7 @@ public class XRHandsManager : MonoBehaviour
 
     // Function to process hand data (joint positions and rotations)
     // https://docs.unity3d.com/Packages/com.unity.xr.hands@1.3/api/UnityEngine.XR.Hands.XRHandJointID.html
-    private HandData ProcessHandData(XRHand hand, XRHandJoint wristJoint)
+    private HandData ProcessHandData(XRHand hand)
     {
         HandData handData = new HandData
         {
@@ -89,58 +89,95 @@ public class XRHandsManager : MonoBehaviour
             rotations = new Quaternion[5]
         };
 
-        Quaternion wristRot = Quaternion.identity;
-        if (wristJoint.TryGetPose(out Pose wristPose)) {
-            wristRot = wristPose.rotation;
-        }
-        else {
-            Debug.Log("no pose for wrist");
-        }
-
         int index = 0;
-        // Loop through all joint IDs by casting an enum value to indices(int), so that we can iterate
-        // https://docs.unity3d.com/Packages/com.unity.xr.hands@1.3/api/UnityEngine.XR.Hands.XRHandJointID.html
-        for (int i = XRHandJointID.BeginMarker.ToIndex(); i < XRHandJointID.EndMarker.ToIndex(); i++)
+
+        // Special case for the thumb
+        XRHandJoint thumbTip = hand.GetJoint(XRHandJointID.ThumbTip);
+        XRHandJoint thumbProximal = hand.GetJoint(XRHandJointID.ThumbProximal);
+        XRHandJoint thumbMetacarpal = hand.GetJoint(XRHandJointID.ThumbMetacarpal);
+
+        if (thumbTip.TryGetPose(out Pose thumbTipPose) &&
+            thumbProximal.TryGetPose(out Pose thumbProximalPose) &&
+            thumbMetacarpal.TryGetPose(out Pose thumbMetacarpalPose))
         {
-            // Recasts indice back to Joint ID so we can use the joint data
-            XRHandJointID jointID = XRHandJointIDUtility.FromIndex(i);
-            // Only gets data for proximal joints of each finger
-            if (isProximal(jointID)) {
-                // Obtains joint
-                XRHandJoint joint = hand.GetJoint(jointID);
-                
-                // Pose is position & rotation. This is attempting to get the post of the specified joint gameobject.
-                if (joint.TryGetPose(out Pose pose))
-                {
-                    // This is the finger rotation in relation to the wrist, instead of the global space
-                    Quaternion rot = Quaternion.Inverse(wristRot) * pose.rotation;
+            // Vector from metacarpal to proximal joint
+            Vector3 metacarpalToProximal = thumbProximalPose.position - thumbMetacarpalPose.position;
+            metacarpalToProximal.Normalize();
 
-                    Debug.Log($"{hand.handedness} Hand - {jointID}: Position: {pose.position}, Rotation: {pose.rotation}");
-                    handData.positions[index] = pose.position;
-                    handData.rotations[index] = rot;
-                    index ++;
-                }
-                else
-                {
-                    Debug.LogWarning($"No valid pose for {jointID} in {hand.handedness} hand.");
-                }
-            }
-            
+            // Vector from proximal to tip joint
+            Vector3 proximalToTip = thumbTipPose.position - thumbProximalPose.position;
+            proximalToTip.Normalize();
+
+            // Calculate the bend angle for the thumb
+            float thumbBendAngle = Vector3.Angle(metacarpalToProximal, proximalToTip);
+
+            handData.positions[index] = thumbTipPose.position;
+            handData.rotations[index] = Quaternion.Euler(thumbBendAngle, 0, 0);
+
+            Debug.Log($"{hand.handedness} Hand - ThumbTip: Bend Angle: {thumbBendAngle:F2}");
+
+            index++;
         }
-        return handData;
-    }
+        else
+        {
+            Debug.LogWarning($"No valid pose for thumb joints in {hand.handedness} hand.");
+        }
 
-    private bool isProximal(XRHandJointID jointID) {
-
-        HashSet<XRHandJointID> proximalIndices = new HashSet<XRHandJointID> {
-            XRHandJointID.ThumbTip,
+        // Process the other fingers (index, middle, ring, pinky)
+        foreach (XRHandJointID jointID in new XRHandJointID[] {
             XRHandJointID.IndexTip,
             XRHandJointID.MiddleTip,
             XRHandJointID.RingTip,
-            XRHandJointID.LittleTip 
+            XRHandJointID.LittleTip })
+        {
+            XRHandJoint tipJoint = hand.GetJoint(jointID);
+            XRHandJoint middleJoint = hand.GetJoint(jointID - 1); // Distal joint
+            XRHandJoint proximalJoint = hand.GetJoint(jointID - 2); // Proximal joint
+
+            if (tipJoint.TryGetPose(out Pose tipPose) &&
+                middleJoint.TryGetPose(out Pose middlePose) &&
+                proximalJoint.TryGetPose(out Pose proximalPose))
+            {
+                // Vector from proximal to middle joint
+                Vector3 proximalToMiddle = middlePose.position - proximalPose.position;
+                proximalToMiddle.Normalize();
+
+                // Vector from middle to tip joint
+                Vector3 middleToTip = tipPose.position - middlePose.position;
+                middleToTip.Normalize();
+
+                // Calculate the bend angle for the finger
+                float bendAngle = Vector3.Angle(proximalToMiddle, middleToTip);
+
+                handData.positions[index] = tipPose.position;
+                handData.rotations[index] = Quaternion.Euler(bendAngle, 0, 0);
+
+                Debug.Log($"{hand.handedness} Hand - {jointID}: Bend Angle: {bendAngle:F2}");
+
+                index++;
+            }
+            else
+            {
+                Debug.LogWarning($"No valid pose for {jointID} or its related joints in {hand.handedness} hand.");
+            }
+        }
+
+        return handData;
+    }
+
+
+
+    private bool isDistal(XRHandJointID jointID) {
+
+        HashSet<XRHandJointID> distalIndices = new HashSet<XRHandJointID> {
+            XRHandJointID.ThumbDistal,
+            XRHandJointID.IndexDistal,
+            XRHandJointID.MiddleDistal,
+            XRHandJointID.RingDistal,
+            XRHandJointID.LittleDistal 
         };
 
-        return proximalIndices.Contains(jointID);
+        return distalIndices.Contains(jointID);
 
     }
 }
