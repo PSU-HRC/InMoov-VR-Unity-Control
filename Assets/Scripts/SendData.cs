@@ -45,33 +45,30 @@ public class SendData : MonoBehaviour
 
     // Arduino will receive a string like this:
     // Left:32.32
-    private string ConfigureData(HandData handData) {
-        //string formattedData = $"{handData.handedness}:";
-        string formattedData = "";
-        string debugData = "";
-        //from 1 to < 2 because we are isolating the pointer finger for testing. Should be 0 to 4
-        for (int i = 0; i <= 4; i++)
-        {
-            Vector3 pos = handData.positions[i];
-            Quaternion rot = handData.rotations[i];
-            Vector3 angles = rot.eulerAngles;
+  private string ConfigureData(HandData handData) {
+    string formattedData = "";
+    string debugData = "";
 
-            //formattedData += $"Joint{i} Pos: {pos.x:F2}, {pos.y:F2}, {pos.z:F2} ";
-            //formattedData += $"Rot: {rot.x:F2}, {rot.y:F2}, {rot.z:F2}, {rot.w:F2} | ";
+    for (int i = 0; i <= 4; i++) {
+        Vector3 pos = handData.positions[i];
+        Quaternion rot = handData.rotations[i];
 
-            float fingerBend = handData.rotations[i].eulerAngles.x;
-            if (fingerBend > 180) {
-                fingerBend = 0;
-            }
-            formattedData += $"{3*(Mathf.RoundToInt(fingerBend))} ";
-            debugData += $"{fingerNames[i]}: {3*Mathf.RoundToInt(fingerBend)} ";
-            if (i == 4) {
-                Debug.Log($"{debugData}");
-            }
-            
-        }       
-        return formattedData;//.TrimEnd(); 
+        // Get the x-axis rotation and clamp it to [0, 180]
+        float fingerBend = Mathf.Clamp(rot.eulerAngles.x, 0, 180);
+
+        // Use the clamped value
+        formattedData += $"{3 * Mathf.RoundToInt(fingerBend)} ";
+        debugData += $"{fingerNames[i]}: {3 * Mathf.RoundToInt(fingerBend)} ";
+
+        // Debug output for the last finger
+        if (i == 4) {
+            Debug.Log($"{debugData}");
+        }
     }
+
+    return formattedData;
+}
+
 
 
     void OnApplicationQuit()

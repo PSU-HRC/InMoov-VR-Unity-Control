@@ -114,7 +114,7 @@ public class XRHandsManager : MonoBehaviour
             handData.positions[index] = thumbTipPose.position;
             handData.rotations[index] = Quaternion.Euler(thumbBendAngle, 0, 0);
 
-            Debug.Log($"{hand.handedness} Hand - ThumbTip: Bend Angle: {thumbBendAngle:F2}");
+            //Debug.Log($"{hand.handedness} Hand - ThumbTip: Bend Angle: {thumbBendAngle:F2}");
 
             index++;
         }
@@ -152,7 +152,7 @@ public class XRHandsManager : MonoBehaviour
                 handData.positions[index] = tipPose.position;
                 handData.rotations[index] = Quaternion.Euler(bendAngle, 0, 0);
 
-                Debug.Log($"{hand.handedness} Hand - {jointID}: Bend Angle: {bendAngle:F2}");
+                //Debug.Log($"{hand.handedness} Hand - {jointID}: Bend Angle: {bendAngle:F2}");
 
                 index++;
             }
