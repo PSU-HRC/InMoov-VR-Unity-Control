@@ -60,7 +60,7 @@ public class XRHandsManager : MonoBehaviour
                     //Debug.Log("Left hand is being tracked");
                     //XRHandJoint leftWristJoint = leftHand.GetJoint(XRHandJointID.Wrist);
                     HandData leftData = ProcessHandData(leftHand);
-                    //sendDataScript.SendToArduino(leftData);
+                    sendDataScript.SendToArduino(leftData);
                 }
 
                 // Right hand is being tracked
@@ -161,6 +161,23 @@ public class XRHandsManager : MonoBehaviour
                 Debug.LogWarning($"No valid pose for {jointID} or its related joints in {hand.handedness} hand.");
             }
         }
+
+        //
+        // Add elbow data retrieval
+        XRHandJoint wristJoint = hand.GetJoint(XRHandJointID.Wrist);
+        XRHandJoint elbowJoint = hand.GetJoint(XRHandJointID.IndexMetacarpal); // Approximate elbow position
+
+        if (wristJoint.TryGetPose(out Pose wristPose)) {
+            Debug.Log($"{hand.handedness} Hand - Wrist Position: {wristPose.position}");
+        }
+        if (elbowJoint.TryGetPose(out Pose elbowPose)) {
+            Debug.Log($"{hand.handedness} Hand - Estimated Elbow Position: {elbowPose.position}");
+        }
+        else
+        {
+            Debug.LogWarning($"Elbow joint tracking not available for {hand.handedness} hand.");
+        }
+        //
 
         return handData;
     }

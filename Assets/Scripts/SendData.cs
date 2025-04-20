@@ -1,4 +1,3 @@
-
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -38,35 +37,43 @@ public class SendData : MonoBehaviour
         if (data != null && data != "" && port.IsOpen)
         {
             port.WriteLine(data);
-            //Debug.Log("Sent to Arduino: " + data);
+            Debug.Log("Sent to Arduino: " + data);
         }
         
     }
 
     // Arduino will receive a string like this:
     // Left:32.32
-  private string ConfigureData(HandData handData) {
-    string formattedData = "";
-    string debugData = "";
+private string ConfigureData(HandData handData) 
+{
+    // Start with hand identifier (Left/Right)
+    string formattedData = $"{handData.handedness}:";
+    string debugData = $"{handData.handedness} Hand - ";
 
-    for (int i = 0; i <= 4; i++) {
-        Vector3 pos = handData.positions[i];
+    for (int i = 0; i <= 4; i++) 
+    {
+        // Vector3 pos = handData.positions[i];
         Quaternion rot = handData.rotations[i];
 
         // Get the x-axis rotation and clamp it to [0, 180]
         float fingerBend = Mathf.Clamp(rot.eulerAngles.x, 0, 180);
+        int servoValue = 3 * Mathf.RoundToInt(fingerBend);
 
-        // Use the clamped value
-        formattedData += $"{3 * Mathf.RoundToInt(fingerBend)} ";
-        debugData += $"{fingerNames[i]}: {3 * Mathf.RoundToInt(fingerBend)} ";
+        // Format for Arduino (values separated by spaces)
+        formattedData += $"{servoValue} ";
+        
+        // Format for debug output
+        debugData += $"{fingerNames[i]}:{servoValue} ";
 
         // Debug output for the last finger
-        if (i == 4) {
-            Debug.Log($"{debugData}");
+        if (i == 4) 
+        {
+            Debug.Log(debugData);
         }
     }
 
-    return formattedData;
+    // Remove trailing space and return
+    return formattedData.Trim();
 }
 
 
