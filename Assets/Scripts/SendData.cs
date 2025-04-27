@@ -2,18 +2,66 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO.Ports;
+
+public class SendData : MonoBehaviour
+{
+    private SerialPort port;
+    [SerializeField] private string COM = "COM3";
+    [SerializeField] private int baudRate = 9600;
+    private string[] fingerNames = { "Thumb", "Index", "Middle", "Ring", "Pinky", "Elbow" };
+
+    void Start()
+    {
+        port = new SerialPort(COM, baudRate);
+        try {
+            port.Open();
+            Debug.Log($"Port opened: {port.IsOpen}");
+        } catch (System.Exception e) {
+            Debug.LogError($"Port error: {e.Message}");
+        }
+    }
+
+    public void SendToArduino(XRHandsManager.HandData handData)
+    {
+        if (!port.IsOpen) return;
+        
+        string data = $"{handData.handedness}:";
+        string debugOutput = $"{handData.handedness} Hand - ";
+        
+        for (int i = 0; i < 6; i++)
+        {
+            float angle = Mathf.Clamp(handData.rotations[i].eulerAngles.x, 0, 180);
+            int value = (i < 5) ? 3 * Mathf.RoundToInt(angle) : Mathf.RoundToInt(angle);
+            
+            data += $"{value} ";
+            debugOutput += $"{fingerNames[i]}:{value} ";
+        }
+        
+        port.WriteLine(data.Trim());
+        Debug.Log(debugOutput);
+    }
+
+    void OnApplicationQuit()
+    {
+        if (port.IsOpen) port.Close();
+    }
+}
+
+
+/*
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using System.IO.Ports;
 using UnityEngine.XR.Hands;
 using UnityEngine.XR.Management;
 
 public class SendData : MonoBehaviour
 {
     private SerialPort port;
-    [SerializeField]
-    private string COM;
-    [SerializeField]
-    private int baudRate;
-    [SerializeField]
-    private int x = 0;
+    [SerializeField] private string COM;
+    [SerializeField] private int baudRate;
+    [SerializeField] private int x = 0;
 
     string[] fingerNames = { "Thumb", "Index", "Middle", "Ring", "Pinky" };
 
@@ -21,16 +69,24 @@ public class SendData : MonoBehaviour
     void Start()
     {
         port = new SerialPort(COM, baudRate);
-        Debug.Log($"Com: {COM}, baud: {baudRate}");
-        if (!port.IsOpen) {
+        try {
             port.Open();
-            Debug.Log("Port opened");
-            System.Threading.Thread.Sleep(100);
+            Debug.Log($"Port opened: {port.IsOpen}");
+        } catch (System.Exception e) {
+            Debug.LogError($"Port error: {e.Message}");
         }
-        Debug.Log($"TEST: {port.IsOpen}");
+        // Debug.Log($"Com: {COM}, baud: {baudRate}");
+        // if (!port.IsOpen) {
+        //     port.Open();
+        //     Debug.Log("Port opened");
+        //     System.Threading.Thread.Sleep(100);
+        // }
+        // Debug.Log($"TEST: {port.IsOpen}");
     }
 
     public void SendToArduino(HandData handData) {
+        if (!port.IsOpen) return;
+
         string data = ""; 
         data = ConfigureData(handData);
 
@@ -88,3 +144,4 @@ private string ConfigureData(HandData handData)
         }
     }
 }
+*/
