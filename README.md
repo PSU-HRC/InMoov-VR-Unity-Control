@@ -22,13 +22,18 @@ We will be using a Meta Quest 2 and Unity to implement VR controls into our club
 3. Double check you've done everything correctly by running:<br/>
      git remote -v
 
+#### Install and Open Arduino
+1. [Install Arduino](https://www.arduino.cc/en/software/)
+2. Clone the Arduino file called "UnityVRControlCode" in the [Arduino](https://github.com/PSU-HRC/Arduino) repository, like before (The other files are not needed as they are for manual controls)
+3. Open the file
+
 #### Open the Project in Unity
 1. In the UnityHub Add dropdown, choose "Add project from disk".
 2. Find your project and select it.
 3. Open the project
 4. Go to the "Scenes" folder in the bottom Project window and open "VR Test Scene"
       
-#### Install the Meta Quest Link app
+#### Install the Meta Quest Link app (Only for Windows)
 1. [Download Meta Quest Link] (https://www.meta.com/help/quest/articles/headsets-and-accessories/oculus-rift-s/install-app-for-link/)
 2. Create a Meta account
 3. Plug in Meta Quest 2 Headset and estbalish the link. Requires action on your laptop and inside the headset.
@@ -36,3 +41,4 @@ We will be using a Meta Quest 2 and Unity to implement VR controls into our club
 
 # Video References
 1. [Youtube Playlist of a Very Good Unity VR Setup](https://youtube.com/playlist?list=PLX8u1QKl_yPD4IQhcPlkqxMt35X2COvm0&si=6ncEnU9DhJC6cByr). Check out videos 1-3, and 6
+2. [Arduino's Official Tutorials](https://www.arduino.cc/en/Tutorial/HomePage/)
