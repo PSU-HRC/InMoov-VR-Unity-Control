@@ -37,7 +37,19 @@ We will be using a Meta Quest 2 and Unity to implement VR controls into our club
 1. [Download Meta Quest Link] (https://www.meta.com/help/quest/articles/headsets-and-accessories/oculus-rift-s/install-app-for-link/)
 2. Create a Meta account
 3. Plug in Meta Quest 2 Headset and estbalish the link. Requires action on your laptop and inside the headset.
-4. Once link is established, choose the "extend screen" option from the menu in the headset. Choose Unity and run the program.
+4. Once link is established, choose the "extend screen" option from the menu in the headset. Choose Unity and run the program. Once all connection links are done running Unity on you laptop will automatically run it on your headset.
+
+#### Connection Links and Running (WIP - COMM ports)
+
+# Troubleshooting
+
+Some troubleshooting steps useful in debugging.
+
+#### Arduino Serial Monitor: Useful to just test the Arduino link to the physical devices (VR not needed)
+1. Open the Arduino file that is used for connecting to Unity.
+2. WIP
+
+
 
 # Video References
 1. [Youtube Playlist of a Very Good Unity VR Setup](https://youtube.com/playlist?list=PLX8u1QKl_yPD4IQhcPlkqxMt35X2COvm0&si=6ncEnU9DhJC6cByr). Check out videos 1-3, and 6
