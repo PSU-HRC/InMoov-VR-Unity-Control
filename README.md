@@ -26,6 +26,8 @@ We will be using a Meta Quest 2 and Unity to implement VR controls into our club
 1. [Install Arduino](https://www.arduino.cc/en/software/)
 2. Clone the Arduino file called "UnityVRControlCode" in the [Arduino](https://github.com/PSU-HRC/Arduino) repository, like before (The other files are not needed as they are for manual controls)
 3. Open the file
+4. In general when you plug in the board the app will automatically select the correct one, but if not, you can manual select it in the drop down.
+5. If its the first time or any changes were made to the code, verify the code using the check mark, and the arrow next to it will compile it and then upload it to the board.
 
 #### Open the Project in Unity
 1. In the UnityHub Add dropdown, choose "Add project from disk".
@@ -39,15 +41,35 @@ We will be using a Meta Quest 2 and Unity to implement VR controls into our club
 3. Plug in Meta Quest 2 Headset and estbalish the link. Requires action on your laptop and inside the headset.
 4. Once link is established, choose the "extend screen" option from the menu in the headset. Choose Unity and run the program. Once all connection links are done running Unity on you laptop will automatically run it on your headset.
 
-#### Connection Links and Running (WIP - COMM ports)
+#### Connection Links
+1. Open Arduino and connect the board.
+2. When connect you are displayed with the COM number in the board list. Record this. (This can differ for each computer so its important to change it.)
+3. Open the Unity Hub, which will let you open the project.
+4. When Unity is open, on the left menu, expand "XR Managers" and open up "Data Managers"
+5. In this change the "COM" what was displayed in Arduino (like COM13). The Baud Rate can be kept at 9600.
+
+#### Wiring
+1. WIP
+
+#### Running
+1. Now that everything is done we can final run it. Final check:
+    1. VR is connect and "Meta Quest Link" app is open.
+    2. Arduino board is connect and the code is compiled and pushed.
+    3. Unity is open.
+    4. Wiring is done right and everything is connected to power.
+2. Wear the headset and set up the boundary as needed.
+3. Click the run button on Unity (Middle top of the appplication)
+4. This should automatically pop up in the VR and then start the simulation!
 
 # Troubleshooting
 
 Some troubleshooting steps useful in debugging.
 
 #### Arduino Serial Monitor: Useful to just test the Arduino link to the physical devices (VR not needed)
-1. Open the Arduino file that is used for connecting to Unity.
-2. WIP
+1. Open the Arduino file that is used for connecting to Unity called "UnityVRControlCode" in the [Arduino](https://github.com/PSU-HRC/Arduino) repository.
+2. On the top right click on the "Serial Monitor", which looks like a magnifying glass.
+3. In the terminal that open you can type "Left 90 45 90 45 90 45" or "Right 90 45 90 45 90 45" where the we are first indicating the hand that is used. Then the proceeding number each represent the angles input from Unity in the order thumb, index, middle, ring, pinky, elbow."
+4. This will simulate the Unity input without the VR.
 
 
 
