@@ -3426,9 +3426,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f333062f1d372674bafed106fb48627b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  COM: COM13
+  COM: COM16
   baudRate: 9600
-  x: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
